@@ -11,6 +11,9 @@ counterFiles=0
 counterDirs=0
 counterArchiveFiles=0
 
+defaultKey=./private_key.pem
+
+
 createBackup(){
     # count files before backup
     filesBefore=$(nrFiles $backupDirectory)
@@ -21,9 +24,9 @@ createBackup(){
 
     compareDirectoriesAgainstArchive
 
-    #echo "Backup from ${backupDirectory} with ${filesBefore} files and ${dirsBefore} directories created and stored in ${outputDirectory} as ${outputFile}"
-    echo "ls ${outputArchive}"
-    ls -la $outputArchive
+    signAndEncrypt
+
+    rm $outputArchive
 
     let counterFiles=$((numberFilesInDir))+$counterFiles
     let counterDirs=$((numberDirsInDir))+$counterDirs
@@ -60,7 +63,17 @@ compareDirectoriesAgainstArchive(){
         echo "Backup of ${backupDirectory} failed!"
         exit 1
     fi
+}
 
+signAndEncrypt() {
+    echo "Enter password for encryption:"
+    read -s password
+    echo "$password" | openssl enc -aes-256-cbc -salt -in "${outputArchive}" -out "${outputArchive}.enc" -pass stdin 2> /dev/null
+    echo "Encrypting of ${backupDirectory} completed successfully!"
+    echo "Enter path to your private key for signing, if no key is entered the default is ${defaultKey}"
+    read private_key
+    openssl pkeyutl -rawin -sign -in ${outputArchive}.enc -inkey "${private_key:-defaultKey}" "${outputArchive}.sig"
+    echo "Signing of ${backupDirectory} completed successfully!"
 }
 
 # user input for backup directory
@@ -103,3 +116,5 @@ done
 echo "Number of archived files: $counterFiles"
 echo "Number of archived directories: $counterDirs"
 echo "Number of created archivs: $counterArchivFiles"
+
+echo "END"
