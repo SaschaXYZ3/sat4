@@ -2,11 +2,14 @@
 #Hartl Sascha
 
 #variables
-outputDirectory="/tmp"
 currentDate=$(date +"%Y-%m-%d-%H:%M:%S")
-outputFile="backup_${USER}_${currentDate}.tar.gz"
-outputArchive="${outputDirectory}/${outputFile}"
+#outputFile="backup_${USER}_${currentDate}.tar.gz"
+outputArchive="/tmp/backup_${USER}_${currentDate}.tar.gz"
 defaultDirectory="/home/$USER"
+
+counterFiles=0
+counterDirs=0
+counterArchiveFiles=0
 
 createBackup(){
     # count files before backup
@@ -21,6 +24,10 @@ createBackup(){
     #echo "Backup from ${backupDirectory} with ${filesBefore} files and ${dirsBefore} directories created and stored in ${outputDirectory} as ${outputFile}"
     echo "ls ${outputArchive}"
     ls -la $outputArchive
+
+    let counterFiles=$((numberFilesInDir))+$counterFiles
+    let counterDirs=$((numberDirsInDir))+$counterDirs
+    let counterArchivFiles++
 }
 
 # functions from 2
@@ -81,8 +88,8 @@ do
     then
         backupDirectory=$newInputDirrectory
         currentDate=$(date +"%Y-%m-%d-%H:%M:%S")
-        outputFile="backup_${USER}_${currentDate}.tar.gz"
-        outputArchive="${outputDirectory}/${outputFile}"
+        #outputFile="backup_${USER}_${currentDate}.tar.gz"
+        outputArchive="/tmp/backup_${USER}_${currentDate}.tar.gz"
         createBackup
     else
         echo "Directory $newInputDirrectory does not exist."
@@ -91,3 +98,8 @@ do
     echo "Do you want to backup another directory? (y/n)"
     read answer
 done
+
+# print the number of files, directories and created archives
+echo "Number of archived files: $counterFiles"
+echo "Number of archived directories: $counterDirs"
+echo "Number of created archivs: $counterArchivFiles"
