@@ -8,16 +8,6 @@ outputFile="backup_${USER}_${currentDate}.tar.gz"
 outputArchive="${outputDirectory}/${outputFile}"
 defaultDirectory="/home/$USER"
 
-# user input for backup directory
-echo "Enter directory to backup, if no directory is entered the default is your home directory"
-read inputDirectory
-
-if [ -z "${inputDirectory}" ]; then
-    echo "No directory specified. Using default directory: ${defaultDirectory}"
-fi
-
-backupDirectory=${inputDirectory:-$defaultDirectory}
-
 createBackup(){
     # count files before backup
     filesBefore=$(nrFiles $backupDirectory)
@@ -66,4 +56,38 @@ compareDirectoriesAgainstArchive(){
 
 }
 
+# user input for backup directory
+echo "Enter directory to backup, if no directory is entered the default is your home directory"
+read inputDirectory
+
+if [ -z "${inputDirectory}" ]; then
+    echo "No directory specified. Using default directory: ${defaultDirectory}"
+fi
+
+backupDirectory=${inputDirectory:-$defaultDirectory}
+
 createBackup
+
+# ask if the user wants to backup another directory (Loops & Arithemtics)
+echo "Do you want to backup another directory? (y/n)"
+read answer
+
+while [ "$answer" == "y" ]
+do
+    echo "Please enter directory to backup:"
+    read newInputDirrectory
+
+    if [ -d "$newInputDirrectory" ]
+    then
+        backupDirectory=$newInputDirrectory
+        currentDate=$(date +"%Y-%m-%d-%H:%M:%S")
+        outputFile="backup_${USER}_${currentDate}.tar.gz"
+        outputArchive="${outputDirectory}/${outputFile}"
+        createBackup
+    else
+        echo "Directory $newInputDirrectory does not exist."
+    fi
+
+    echo "Do you want to backup another directory? (y/n)"
+    read answer
+done
