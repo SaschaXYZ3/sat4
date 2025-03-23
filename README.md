@@ -72,4 +72,9 @@ Enter path to your private key for signing, if no key is entered the default is 
 pkeyutl: Use -help for summary.
 Signing of /home/user completed successfully!
 Do you want to backup another directory? (y/n)
+n
+Number of archived files: 14
+Number of archived directories: 7
+Number of created archivs: 1
+END
 ```

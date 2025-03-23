@@ -11,7 +11,7 @@ counterFiles=0
 counterDirs=0
 counterArchiveFiles=0
 
-defaultKey=./private_key.pem
+defaultKey="./private_key.pem"
 
 
 createBackup(){
@@ -68,11 +68,11 @@ compareDirectoriesAgainstArchive(){
 signAndEncrypt() {
     echo "Enter password for encryption:"
     read -s password
-    echo "$password" | openssl enc -aes-256-cbc -salt -in "${outputArchive}" -out "${outputArchive}.enc" -pass stdin 2> /dev/null
+    openssl enc -aes-256-cbc -salt -in "${outputArchive}" -out "${outputArchive}.enc" -pass $password 2> /dev/null
     echo "Encrypting of ${backupDirectory} completed successfully!"
     echo "Enter path to your private key for signing, if no key is entered the default is ${defaultKey}"
-    read private_key
-    openssl pkeyutl -rawin -sign -in ${outputArchive}.enc -inkey "${private_key:-defaultKey}" "${outputArchive}.sig"
+    read privateKey
+    openssl pkeyutl -rawin -sign -in ${outputArchive}.enc -inkey "${privateKey:-$defaultKey}" -out "${outputArchive}.sig"
     echo "Signing of ${backupDirectory} completed successfully!"
 }
 
