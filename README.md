@@ -1,6 +1,6 @@
 # README
 
-# Hartl Sascha
+#### Author: Hartl Sascha
 
 ## Description
 

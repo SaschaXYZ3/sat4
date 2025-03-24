@@ -1,5 +1,5 @@
 #!/bin/bash
-#Hartl Sascha
+# Author: Hartl Sascha
 
 #variables
 currentDate=$(date +"%Y-%m-%d-%H:%M:%S")
