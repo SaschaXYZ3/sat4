@@ -8,6 +8,9 @@ defaultPublicKey="./public_key.pem"
 echo "Enter path to the encrypted archive to restore:"
 read encryptedArchive
 
+echo "Enter path to the signature archive to restore:"
+read signArchive
+
 # Ask for the path to the public key for signature verification (default is ./public_key.pem)
 echo "Enter path to your public key for signature verification (default: $defaultPublicKey):"
 read publicKey
@@ -35,7 +38,7 @@ echo "Enter password for decryption:"
 read -s password
 
 # Verify the signature of the encrypted file
-openssl dgst -sha256 -verify "$publicKey" -signature "${encryptedArchive}.sig" "$encryptedArchive"
+openssl dgst -sha256 -verify "$publicKey" -signature "$signArchive" "$encryptedArchive"
 if [ $? -eq 0 ]; then
     echo "Signature is valid"
 else
@@ -43,9 +46,17 @@ else
     exit 1
 fi
 
-# Decrypt the encrypted archive file
+# Decrypt the encrypted archive file with `-pbkdf2`
 decryptedArchive="${encryptedArchive%.enc}"
-openssl enc -d -aes-256-cbc -in "$encryptedArchive" -out "$decryptedArchive" -pass pass:"$password"
+#openssl enc -d -aes-256-cbc -pbkdf2 -in "$encryptedArchive" -out "$decryptedArchive" -pass pass:"$password"
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 100000 -in "$encryptedArchive" -out "$decryptedArchive" -pass pass:"$password"
+
+
+# Check if the decrypted file is valid
+if [ $? -ne 0 ] || [ ! -s "$decryptedArchive" ]; then
+    echo "Decryption failed or resulted in an empty file. Exiting."
+    exit 1
+fi
 
 # Extract the decrypted archive
 echo "Extracting the decrypted archive..."

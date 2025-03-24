@@ -13,7 +13,6 @@ counterArchiveFiles=0
 
 defaultKey="./private_key.pem"
 
-
 createBackup(){
     # count files before backup
     filesBefore=$(nrFiles $backupDirectory)
@@ -68,11 +67,21 @@ compareDirectoriesAgainstArchive(){
 signAndEncrypt() {
     echo "Enter password for encryption:"
     read -s password
-    openssl enc -aes-256-cbc -salt -in "${outputArchive}" -out "${outputArchive}.enc" -pass $password 2> /dev/null
+    #openssl enc -aes-256-cbc -salt -in "${outputArchive}" -out "${outputArchive}.enc" -pass pass:"$password"
+    #correction ChatGPT
+    openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 -in "${outputArchive}" -out "${outputArchive}.enc" -pass pass:"$password"
+
     echo "Encrypting of ${backupDirectory} completed successfully!"
+
     echo "Enter path to your private key for signing, if no key is entered the default is ${defaultKey}"
     read privateKey
-    openssl pkeyutl -rawin -sign -in ${outputArchive}.enc -inkey "${privateKey:-$defaultKey}" -out "${outputArchive}.sig"
+   
+    ls -l "${outputArchive}.enc"
+
+    #openssl pkeyutl -sign -in "${outputArchive}.enc" -inkey "${privateKey:-$defaultKey}" -out "${outputArchive}.sig"
+    #correction ChatGPT
+    openssl dgst -sha256 -sign "${privateKey:-$defaultKey}" -out "${outputArchive}.sig" "${outputArchive}.enc"
+
     echo "Signing of ${backupDirectory} completed successfully!"
 }
 
